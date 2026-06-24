@@ -8,11 +8,8 @@ $mensaje = isset($_GET['mensaje']) ? $_GET['mensaje'] : '';
 // Obtener stock actual
 $frutas = obtenerStock($pdo);
 
-// Verificar integridad
-$alertas = verificarIntegridad($pdo);
-
-// Obtener últimos logs de trazabilidad
-$logs = $pdo->query("SELECT * FROM trazabilidad ORDER BY id DESC LIMIT 10")->fetchAll();
+// Verificar integridad (solo alertas visibles si hay problemas)
+ $alertas = verificarIntegridad($pdo);
 ?>
 
 <!DOCTYPE html>
@@ -20,13 +17,13 @@ $logs = $pdo->query("SELECT * FROM trazabilidad ORDER BY id DESC LIMIT 10")->fet
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Trazabilidad - Frutas</title>
+    <title>Control de Stock - Frutas</title>
     <link rel="stylesheet" href="estilos.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>🍎 Sistema de Trazabilidad - Frutas</h1>
+            <h1>📦 Control de Stock de Frutas</h1>
             <p>Usuario: <strong>admin</strong></p>
         </header>
 
@@ -37,7 +34,7 @@ $logs = $pdo->query("SELECT * FROM trazabilidad ORDER BY id DESC LIMIT 10")->fet
             </div>
         <?php endif; ?>
 
-        <!-- Alertas de integridad -->
+        <!-- Alertas de integridad (solo si hay problemas) -->
         <?php foreach($alertas as $alerta): ?>
             <div class="mensaje alerta-integridad">
                 <?php echo $alerta; ?>
@@ -98,42 +95,9 @@ $logs = $pdo->query("SELECT * FROM trazabilidad ORDER BY id DESC LIMIT 10")->fet
             </form>
         </div>
 
-        <!-- Tabla de trazabilidad -->
-        <div class="trazabilidad">
-            <h2>📋 Registro de Trazabilidad</h2>
-            <div class="tabla-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Usuario</th>
-                            <th>Fecha y Hora</th>
-                            <th>Tipo de Acción</th>
-                            <th>Detalles</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach($logs as $log): ?>
-                            <tr>
-                                <td><?php echo $log['id']; ?></td>
-                                <td><?php echo $log['usuario']; ?></td>
-                                <td><?php echo date('d/m/Y H:i:s', strtotime($log['fecha_hora'])); ?></td>
-                                <td>
-                                    <span class="badge badge-<?php echo strtolower($log['tipo_accion']); ?>">
-                                        <?php echo $log['tipo_accion']; ?>
-                                    </span>
-                                </td>
-                                <td><?php echo $log['detalles']; ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
+        <!-- Footer simple -->
         <footer>
-            <p>Sistema de Trazabilidad v1.0 - <?php echo date('Y'); ?></p>
-            <p><small>Hash de integridad: MD5</small></p>
+            <p>Sistema con trazabilidad completa - <?php echo date('Y'); ?></p>
         </footer>
     </div>
 </body>

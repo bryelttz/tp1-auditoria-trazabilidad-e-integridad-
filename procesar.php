@@ -4,7 +4,9 @@ require_once 'funciones.php';
 
 $mensaje = "";
 
+// ============================================
 // ACCIÓN: RESETEAR SISTEMA (INSERCIÓN)
+// ============================================
 if (isset($_POST['resetear'])) {
     // Limpiar tablas
     $pdo->query("TRUNCATE TABLE inventario");
@@ -18,7 +20,7 @@ if (isset($_POST['resetear'])) {
         $stmt->execute([$f[0], $f[1], $hash]);
     }
     
-    // Registrar en trazabilidad
+    // 🔒 Trazabilidad OCULTA - Solo se guarda en BD
     registrarLog($pdo, 'INSERCIÓN', 'Datos iniciales cargados: banana(12), manzana(8), pera(5)');
     $mensaje = "✅ Sistema reiniciado correctamente";
 }
@@ -44,15 +46,15 @@ if (isset($_POST['accion'])) {
             if ($accion == 'agregar') {
                 $nuevo_stock = $stock_actual + $cantidad;
                 $mensaje = "✅ Agregadas $cantidad cajas de $fruta";
-                $detalle = "$fruta: $stock_actual → $nuevo_stock (+$cantidad)";
-                registrarLog($pdo, 'UPDATE', $detalle);
+                // 🔒 Trazabilidad OCULTA
+                registrarLog($pdo, 'UPDATE', "$fruta: $stock_actual → $nuevo_stock (+$cantidad)");
                 
             } elseif ($accion == 'retirar') {
                 if ($stock_actual >= $cantidad) {
                     $nuevo_stock = $stock_actual - $cantidad;
                     $mensaje = "✅ Retiradas $cantidad cajas de $fruta";
-                    $detalle = "$fruta: $stock_actual → $nuevo_stock (-$cantidad)";
-                    registrarLog($pdo, 'UPDATE', $detalle);
+                    // 🔒 Trazabilidad OCULTA
+                    registrarLog($pdo, 'UPDATE', "$fruta: $stock_actual → $nuevo_stock (-$cantidad)");
                 } else {
                     $mensaje = "❌ Stock insuficiente. Disponible: $stock_actual";
                 }
@@ -67,11 +69,7 @@ if (isset($_POST['accion'])) {
         }
     }
 }
-
-// ============================================
-// ACCIÓN: ELIMINAR FRUTA (SOFT-DELETE)
-// ============================================
-if (isset($_GET['eliminar'])) {
+ if (isset($_GET['eliminar'])) {
     $fruta = $_GET['eliminar'];
     
     $stmt = $pdo->prepare("SELECT cantidad FROM inventario WHERE fruta = ? AND eliminado = 0");
@@ -84,10 +82,7 @@ if (isset($_GET['eliminar'])) {
         // Marcar como eliminado
         $stmt = $pdo->prepare("UPDATE inventario SET eliminado = 1 WHERE fruta = ?");
         $stmt->execute([$fruta]);
-        
-        // Registrar en trazabilidad
-        $detalle = "$fruta (Stock: $cantidad unidades)";
-        registrarLog($pdo, 'SOFT-DELETE', $detalle);
+        registrarLog($pdo, 'SOFT-DELETE', "$fruta (Stock: $cantidad unidades)");
         
         $mensaje = "🗑️ '$fruta' eliminada (baja lógica)";
     } else {
